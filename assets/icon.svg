@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- TrackMe app icon: the stamp motif from the app itself.
+       A hand-pressed double ring with a check inside, tilted a few degrees.
+       Artwork stays within the maskable safe zone (inner 80%). -->
+  <rect width="512" height="512" fill="#16233B"/>
+
+  <g transform="rotate(-6 256 256)">
+    <!-- outer ring -->
+    <circle cx="256" cy="256" r="168" fill="none" stroke="#C8402B" stroke-width="20"/>
+    <!-- inner ring, lighter, echoing the stamp in the UI -->
+    <circle cx="256" cy="256" r="136" fill="none" stroke="#C8402B" stroke-width="7" opacity="0.6"/>
+    <!-- the check: this place has been visited -->
+    <path d="M188 262 L236 310 L326 208"
+          fill="none"
+          stroke="#C8402B"
+          stroke-width="34"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+  </g>
+</svg>

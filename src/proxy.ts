@@ -10,8 +10,10 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Run on all paths except static assets and image optimization files.
+  // Run on all paths except static assets and the PWA files. sw.js and /offline
+  // must stay reachable while signed out, or the service worker can never
+  // register and the offline fallback would itself redirect to /login.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|icons|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw\\.js|offline|icons|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Schibsted_Grotesk, Geist_Mono } from "next/font/google";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
 // Display face — wordmark and list titles only, used with restraint.
@@ -26,6 +27,21 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TrackMe",
   description: "Track the places you want to try, and check them off.",
+  appleWebApp: {
+    capable: true,
+    title: "TrackMe",
+    // Lets the app draw behind the iOS status bar when installed.
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  // viewportFit: cover pairs with the translucent status bar on notched iPhones.
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#E9EDF2" },
+    { media: "(prefers-color-scheme: dark)", color: "#0E1626" },
+  ],
 };
 
 export default function RootLayout({
@@ -38,7 +54,10 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${schibsted.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="font-sans min-h-full flex flex-col">{children}</body>
+      <body className="font-sans min-h-full flex flex-col">
+        {children}
+        <ServiceWorkerRegistrar />
+      </body>
     </html>
   );
 }
