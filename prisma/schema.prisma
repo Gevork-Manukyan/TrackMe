@@ -1,0 +1,66 @@
+// TrackMe — Prisma schema
+// Data layer for the server side only. The client never imports Prisma;
+// it talks to Dexie (IndexedDB) locally and to server actions over the network.
+//
+// Auth users are owned by Supabase (auth.users). We keep a mirror `User` row in
+// the public schema, keyed by the Supabase auth uid, so our data can foreign-key
+// to it.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Pooled connection (PgBouncer, port 6543) — used at runtime on Vercel serverless.
+  url       = env("DATABASE_URL")
+  // Direct connection (port 5432) — used by `prisma migrate` / introspection.
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id         String     @id // = Supabase auth uid (uuid as string)
+  email      String?
+  createdAt  DateTime   @default(now())
+  categories Category[]
+  items      Item[]
+}
+
+model Category {
+  id        String   @id @default(uuid()) // client-generated so offline creates get a stable id
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt // drives last-write-wins sync
+  deletedAt DateTime? // soft delete so deletions sync offline
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items Item[]
+
+  @@index([userId])
+}
+
+model Item {
+  id         String    @id @default(uuid()) // client-generated for offline creates
+  categoryId String
+  userId     String // denormalized for direct ownership checks
+  name       String
+  visited    Boolean   @default(false)
+  visitedAt  DateTime?
+
+  // Optional data points
+  notes   String?
+  address String? // free-text location (e.g. "123 Main St" or "Downtown")
+  rating  Int?
+  url     String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt // drives last-write-wins sync
+  deletedAt DateTime? // soft delete so deletions sync offline
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([categoryId])
+}
