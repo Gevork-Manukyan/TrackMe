@@ -57,6 +57,30 @@ export default function LoginPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 p-6">
       <div>
+        {/* The mark is the stamp itself — the thing the whole app is about. */}
+        <svg
+          viewBox="0 0 100 100"
+          className="mb-4 h-11 w-11 text-stamp"
+          aria-hidden
+        >
+          <circle
+            cx="50"
+            cy="50"
+            r="37"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="9"
+          />
+          <path
+            d="M32 52 L45 65 L69 38"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="12"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+
         <h1 className="font-display text-4xl font-semibold tracking-tight">
           TrackMe
         </h1>
@@ -102,7 +126,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-1 rounded-lg bg-stamp px-3 py-2.5 font-medium text-white disabled:opacity-50"
+          className="mt-1 rounded-lg bg-ink px-3 py-2.5 font-medium text-ground disabled:opacity-50"
         >
           {loading ? "…" : mode === "signin" ? "Sign in" : "Sign up"}
         </button>

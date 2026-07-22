@@ -69,10 +69,12 @@ export default async function CategoryPage({
         </ul>
       )}
 
-      <form action={removeCategory} className="mt-8 border-t border-rule pt-4">
+      {/* Destructive, but quiet: it only reddens on hover so it never competes
+          with "Add" for attention, and never reads as the primary action. */}
+      <form action={removeCategory} className="mt-10 border-t border-rule pt-4">
         <button
           type="submit"
-          className="text-sm text-stamp underline underline-offset-2"
+          className="text-sm text-slate underline underline-offset-2 transition-colors hover:text-stamp"
         >
           Delete this list
         </button>

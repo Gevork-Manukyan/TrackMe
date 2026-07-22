@@ -31,7 +31,7 @@ export function AddForm({ action, placeholder, submitLabel }: Props) {
       />
       <button
         type="submit"
-        className="shrink-0 rounded-lg bg-stamp px-3 py-2 text-sm font-medium text-white"
+        className="shrink-0 rounded-lg bg-ink px-3 py-2 text-sm font-medium text-ground"
       >
         {submitLabel}
       </button>

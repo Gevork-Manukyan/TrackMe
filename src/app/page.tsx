@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createCategory } from "@/lib/actions/categories";
 import { AddForm } from "@/components/AddForm";
+import { StampDots } from "@/components/StampDots";
 
 export default async function Home() {
   const user = await requireUser();
@@ -25,21 +26,16 @@ export default async function Home() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-6">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">
       <header className="mb-6 flex items-baseline justify-between gap-3">
         <h1 className="font-display text-3xl font-semibold tracking-tight">
           TrackMe
         </h1>
-        <div className="flex items-baseline gap-3">
+        {totalStamped > 0 && (
           <span className="font-mono text-xs tracking-widest text-slate uppercase">
             {totalStamped} stamped
           </span>
-          <form action="/auth/signout" method="post">
-            <button className="font-mono text-xs tracking-widest text-slate uppercase underline underline-offset-2">
-              Sign out
-            </button>
-          </form>
-        </div>
+        )}
       </header>
 
       <div className="mb-6">
@@ -60,7 +56,6 @@ export default async function Home() {
           {categories.map((c) => {
             const total = c.items.length;
             const done = c.items.filter((i) => i.visited).length;
-            const pct = total === 0 ? 0 : (done / total) * 100;
 
             return (
               <li key={c.id}>
@@ -73,24 +68,23 @@ export default async function Home() {
                       {c.name}
                     </h2>
                     <span className="shrink-0 font-mono text-sm text-slate">
-                      {done}/{total}
+                      {total === 0 ? "empty" : `${done}/${total}`}
                     </span>
                   </div>
-                  <div
-                    className="mt-3 h-1 w-full overflow-hidden rounded-full bg-rule"
-                    aria-hidden
-                  >
-                    <div
-                      className="h-full bg-stamp"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
+                  <StampDots total={total} done={done} />
                 </Link>
               </li>
             );
           })}
         </ul>
       )}
+
+      {/* Signing out is rare — it belongs at the end, not competing with the wordmark. */}
+      <form action="/auth/signout" method="post" className="mt-auto pt-10">
+        <button className="text-sm text-slate underline underline-offset-2 transition-colors hover:text-ink">
+          Sign out
+        </button>
+      </form>
     </main>
   );
 }
