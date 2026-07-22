@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * A list's progress drawn in the app's own vocabulary: one small stamp per
  * place, filled once it's been visited. Vermilion means "stamped" everywhere in

@@ -31,13 +31,21 @@ model Category {
   userId    String
   name      String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt // drives last-write-wins sync
   deletedAt DateTime? // soft delete so deletions sync offline
+
+  // Two timestamps with different jobs. `updatedAt` is authored by the client and
+  // decides last-write-wins; it must NOT be @updatedAt, or the server clock would
+  // overwrite an offline edit's real time and let a stale edit win.
+  updatedAt       DateTime
+  // Authored by the server on every write. Drives the pull cursor, so a device
+  // with a skewed clock can never skip records.
+  serverUpdatedAt DateTime @default(now())
 
   user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   items Item[]
 
   @@index([userId])
+  @@index([userId, serverUpdatedAt])
 }
 
 model Item {
@@ -55,12 +63,16 @@ model Item {
   url     String?
 
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt // drives last-write-wins sync
   deletedAt DateTime? // soft delete so deletions sync offline
+
+  // See Category above: client-authored for LWW, server-authored for the cursor.
+  updatedAt       DateTime
+  serverUpdatedAt DateTime @default(now())
 
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([categoryId])
+  @@index([userId, serverUpdatedAt])
 }

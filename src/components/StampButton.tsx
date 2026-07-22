@@ -1,62 +1,45 @@
 "use client";
 
-import { useOptimistic, useState, useTransition } from "react";
-import { toggleItemVisited } from "@/lib/actions/items";
+import { toggleItemVisited } from "@/lib/db/mutations";
 import { stampDate, stampRotation } from "@/lib/stamp";
 
 type Props = {
   id: string;
   name: string;
   visited: boolean;
-  /** Pre-formatted on the server so SSR and client agree. */
-  stamp: { month: string; day: string } | null;
+  visitedAt: string | null;
 };
 
-export function StampButton({ id, name, visited, stamp }: Props) {
-  const [optimisticVisited, setOptimisticVisited] = useOptimistic(visited);
-  const [, startTransition] = useTransition();
-  // Only set once the user presses, so it never runs during SSR.
-  const [pressedStamp, setPressedStamp] = useState<{
-    month: string;
-    day: string;
-  } | null>(null);
-
+/**
+ * The check-off control. No optimistic layer is needed any more: the write goes
+ * to IndexedDB, and useLiveQuery re-renders from it immediately, so the stamp
+ * appears as fast as it ever did without a server round trip in the path.
+ */
+export function StampButton({ id, name, visited, visitedAt }: Props) {
   const rotation = stampRotation(id);
-  const shown = stamp ?? pressedStamp;
-
-  function handleClick() {
-    const next = !optimisticVisited;
-    if (next) setPressedStamp(stampDate(new Date()));
-    startTransition(async () => {
-      setOptimisticVisited(next);
-      await toggleItemVisited(id, next);
-    });
-  }
+  const stamp = visitedAt ? stampDate(new Date(visitedAt)) : null;
 
   return (
     <button
       type="button"
-      onClick={handleClick}
-      aria-pressed={optimisticVisited}
+      onClick={() => void toggleItemVisited(id, !visited)}
+      aria-pressed={visited}
       aria-label={
-        optimisticVisited
-          ? `Remove the stamp from ${name}`
-          : `Stamp ${name} as visited`
+        visited ? `Remove the stamp from ${name}` : `Stamp ${name} as visited`
       }
-      className="shrink-0 grid h-14 w-14 place-items-center rounded-full transition-colors"
+      className="grid h-14 w-14 shrink-0 place-items-center rounded-full transition-colors"
     >
-      {optimisticVisited ? (
+      {visited ? (
         <span
-          key="stamped"
           className="stamp-press grid h-14 w-14 place-items-center rounded-full border-2 border-stamp text-stamp"
           style={{ transform: `rotate(${rotation}deg)` }}
         >
           <span className="grid h-11 w-11 place-items-center rounded-full border border-stamp/60 leading-none">
             <span className="font-mono text-[9px] tracking-[0.14em]">
-              {shown?.month ?? "VISIT"}
+              {stamp?.month ?? "VISIT"}
             </span>
             <span className="font-mono text-sm font-semibold">
-              {shown?.day ?? "✓"}
+              {stamp?.day ?? "✓"}
             </span>
           </span>
         </span>

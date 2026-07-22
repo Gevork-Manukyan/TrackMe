@@ -1,18 +1,9 @@
+"use client";
+
 import { StampButton } from "./StampButton";
 import { RatingInput } from "./RatingInput";
-import { deleteItem, updateItemDetails } from "@/lib/actions/items";
-import { stampDate } from "@/lib/stamp";
-
-export type ItemRowData = {
-  id: string;
-  name: string;
-  visited: boolean;
-  visitedAt: Date | null;
-  notes: string | null;
-  address: string | null;
-  rating: number | null;
-  url: string | null;
-};
+import { deleteItem, updateItemDetails } from "@/lib/db/mutations";
+import type { LocalItem } from "@/lib/db/dexie";
 
 const fieldClass =
   "rounded-lg border border-rule bg-ground px-2 py-1.5 text-ink placeholder:text-slate/60";
@@ -20,8 +11,7 @@ const labelClass =
   "font-mono text-[11px] tracking-widest text-slate uppercase";
 
 /**
- * Presentational — takes data as props and never queries. Phase 4 swaps the
- * data source to Dexie without touching this file.
+ * Presentational — takes a record as a prop and never queries.
  *
  * The row itself is the disclosure control: <summary> covers the name and meta,
  * so tapping anywhere on the text opens the details. The stamp deliberately sits
@@ -29,15 +19,12 @@ const labelClass =
  * <details> is hidden while closed, and anything inside <summary> would toggle
  * the panel when pressed.
  */
-export function ItemRow({ item }: { item: ItemRowData }) {
-  const saveDetails = updateItemDetails.bind(null, item.id);
-  const remove = deleteItem.bind(null, item.id);
-
+export function ItemRow({ item }: { item: LocalItem }) {
   const meta = [item.address, item.notes].filter(Boolean).join(" · ");
 
   return (
     <li className="relative rounded-xl border border-rule bg-card">
-      <details className="group">
+      <details>
         {/* min-height reserves room for the stamp, which is absolutely
             positioned and would otherwise overflow a row with no meta line.
             Centring keeps a one-line row aligned with the stamp beside it. */}
@@ -65,7 +52,24 @@ export function ItemRow({ item }: { item: ItemRowData }) {
         </summary>
 
         <div className="border-t border-rule px-4 pt-3 pb-4">
-          <form action={saveDetails} className="flex flex-col gap-2.5">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              const data = new FormData(event.currentTarget);
+              const ratingRaw = String(data.get("rating") ?? "");
+              void updateItemDetails(item.id, {
+                name: String(data.get("name") ?? ""),
+                notes: String(data.get("notes") ?? "") || null,
+                address: String(data.get("address") ?? "") || null,
+                rating: ratingRaw ? Number(ratingRaw) : null,
+                url: String(data.get("url") ?? "") || null,
+              });
+              // Collapse so the saved values are visible on the row.
+              (event.currentTarget.closest("details") as HTMLDetailsElement).open =
+                false;
+            }}
+            className="flex flex-col gap-2.5"
+          >
             <label className="flex flex-col gap-1">
               <span className={labelClass}>Name</span>
               <input
@@ -122,8 +126,8 @@ export function ItemRow({ item }: { item: ItemRowData }) {
               </button>
 
               <button
-                type="submit"
-                formAction={remove}
+                type="button"
+                onClick={() => void deleteItem(item.id)}
                 className="text-sm text-slate underline underline-offset-2 transition-colors hover:text-stamp"
               >
                 Remove
@@ -139,7 +143,7 @@ export function ItemRow({ item }: { item: ItemRowData }) {
           id={item.id}
           name={item.name}
           visited={item.visited}
-          stamp={item.visitedAt ? stampDate(item.visitedAt) : null}
+          visitedAt={item.visitedAt}
         />
       </div>
     </li>

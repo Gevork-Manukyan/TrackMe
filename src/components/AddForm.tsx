@@ -3,21 +3,28 @@
 import { useRef } from "react";
 
 type Props = {
-  action: (formData: FormData) => Promise<void>;
+  onAdd: (name: string) => Promise<void> | void;
   placeholder: string;
   submitLabel: string;
 };
 
 /** One inline add field, used for both lists and places. */
-export function AddForm({ action, placeholder, submitLabel }: Props) {
+export function AddForm({ onAdd, placeholder, submitLabel }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
     <form
       ref={formRef}
-      action={async (formData) => {
-        await action(formData);
+      onSubmit={async (event) => {
+        event.preventDefault();
+        const input = formRef.current?.elements.namedItem(
+          "name",
+        ) as HTMLInputElement | null;
+        const name = input?.value ?? "";
+        if (!name.trim()) return;
+        // Clear immediately: the write is local, so there is nothing to wait for.
         formRef.current?.reset();
+        await onAdd(name);
       }}
       className="flex items-center gap-2 rounded-xl border border-rule bg-card p-2"
     >

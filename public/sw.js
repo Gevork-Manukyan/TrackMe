@@ -1,15 +1,15 @@
-/* TrackMe service worker — Phase 3 (app shell).
+/* TrackMe service worker.
  *
- * Scope note: this deliberately does NOT cache authenticated page HTML. Those
- * pages contain one account's lists, and a cached copy could be served to a
- * different account signed in on the same device. Phase 4 makes the app work
- * offline properly by moving the data into IndexedDB (Dexie) and rendering
- * from there, at which point the HTML shell becomes user-agnostic and safe to
- * cache. Until then: static assets + an offline fallback.
+ * Pages now render their data from IndexedDB rather than from server-rendered
+ * HTML, so the HTML is a user-agnostic shell and is finally safe to cache — the
+ * reason Phase 3 refused to. Caching it is also what makes an offline launch
+ * work at all: without it a cold navigation falls through to /offline even
+ * though the data is sitting in IndexedDB.
  */
 
-const VERSION = "trackme-v1";
+const VERSION = "trackme-v2";
 const STATIC_CACHE = `${VERSION}-static`;
+const SHELL_CACHE = `${VERSION}-shell`;
 
 const PRECACHE = ["/offline", "/icons/icon-192.png", "/icons/icon-512.png"];
 
@@ -49,20 +49,38 @@ self.addEventListener("fetch", (event) => {
   // Never intercept auth: stale redirects or cached callbacks break sign-in.
   if (url.pathname.startsWith("/auth/")) return;
 
-  // Page loads: always try the network so data is fresh. If the device is
-  // offline, show the fallback rather than a browser error page.
+  // Sync must always reach the network. A cached response here would make the
+  // client believe it had reconciled when it had not.
+  if (url.pathname.startsWith("/api/")) return;
+
+  // Page loads: network first so a fresh shell (and any redirect to /login) wins
+  // when online. Offline, fall back to the cached shell — the page then renders
+  // the user's lists from IndexedDB. Only if we have never cached this route do
+  // we show the offline page.
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(async () => {
-        const fallback = await caches.match("/offline");
-        return (
-          fallback ??
-          new Response("You are offline.", {
-            status: 503,
-            headers: { "Content-Type": "text/plain" },
-          })
-        );
-      }),
+      fetch(request)
+        .then((response) => {
+          // Only cache real pages. Redirects (e.g. to /login) must not be stored,
+          // or a signed-in visitor could be bounced by a stale cached redirect.
+          if (response.ok && response.type === "basic") {
+            const copy = response.clone();
+            caches.open(SHELL_CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          const fallback = await caches.match("/offline");
+          return (
+            fallback ??
+            new Response("You are offline.", {
+              status: 503,
+              headers: { "Content-Type": "text/plain" },
+            })
+          );
+        }),
     );
     return;
   }
