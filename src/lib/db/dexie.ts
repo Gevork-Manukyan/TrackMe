@@ -15,6 +15,8 @@ export type LocalCategory = {
   id: string;
   userId: string;
   name: string;
+  /** The list's ink. Null on lists created before colours existed. */
+  color: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { setItemRating } from "@/lib/db/mutations";
+import type { Ink } from "@/lib/ink";
 
 /**
  * Appears on a row the moment it is stamped, so a rating can be left while the
@@ -13,10 +14,12 @@ import { setItemRating } from "@/lib/db/mutations";
 export function QuickRating({
   itemId,
   name,
+  ink,
   onDone,
 }: {
   itemId: string;
   name: string;
+  ink: Ink;
   onDone: () => void;
 }) {
   const [preview, setPreview] = useState(0);
@@ -41,9 +44,10 @@ export function QuickRating({
             onFocus={() => setPreview(n)}
             onBlur={() => setPreview(0)}
             aria-label={`Rate ${name} ${n} out of 5`}
-            className={`grid h-8 w-7 place-items-center text-lg leading-none transition-colors ${
-              n <= preview ? "text-ink" : "text-rule hover:text-slate"
-            }`}
+            className="grid h-8 w-7 place-items-center text-lg leading-none transition-colors"
+            style={{
+              color: n <= preview ? `var(--ink-${ink})` : "var(--rule)",
+            }}
           >
             ★
           </button>

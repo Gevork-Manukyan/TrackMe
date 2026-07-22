@@ -2,6 +2,7 @@
 
 import { db, type LocalCategory, type LocalItem } from "./dexie";
 import { requestSync } from "./sync";
+import { INKS, inkFor } from "@/lib/ink";
 
 /**
  * Every mutation writes IndexedDB and returns immediately — nothing here awaits
@@ -27,10 +28,28 @@ export async function createCategory(userId: string, name: string) {
   if (!trimmed) return;
 
   const timestamp = now();
+  const id = crypto.randomUUID();
+
+  // Pick the least-used ink rather than hashing the id: a hash collides often
+  // enough that two lists side by side end up the same colour, which defeats
+  // the point of colouring them at all.
+  const existing = await db.categories
+    .filter((c) => c.deletedAt === null)
+    .toArray();
+  const used = new Map<string, number>(INKS.map((ink) => [ink, 0]));
+  for (const c of existing) {
+    const ink = inkFor(c.id, c.color);
+    used.set(ink, (used.get(ink) ?? 0) + 1);
+  }
+  const color = INKS.reduce((best, ink) =>
+    (used.get(ink) ?? 0) < (used.get(best) ?? 0) ? ink : best,
+  );
+
   const category: LocalCategory = {
-    id: crypto.randomUUID(),
+    id,
     userId,
     name: trimmed,
+    color,
     createdAt: timestamp,
     updatedAt: timestamp,
     deletedAt: null,
@@ -49,6 +68,11 @@ export async function renameCategory(id: string, name: string) {
     updatedAt: now(),
     dirty: 1,
   });
+  touched();
+}
+
+export async function setCategoryColor(id: string, color: string) {
+  await db.categories.update(id, { color, updatedAt: now(), dirty: 1 });
   touched();
 }
 

@@ -53,6 +53,7 @@ function toLocalCategory(remote: Record<string, unknown>): LocalCategory {
     id: String(remote.id),
     userId: String(remote.userId),
     name: String(remote.name),
+    color: remote.color ? String(remote.color) : null,
     createdAt: String(remote.createdAt),
     updatedAt: String(remote.updatedAt),
     deletedAt: remote.deletedAt ? String(remote.deletedAt) : null,

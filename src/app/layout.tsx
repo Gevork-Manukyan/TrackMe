@@ -3,11 +3,14 @@ import { Fraunces, Schibsted_Grotesk, Geist_Mono } from "next/font/google";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
-// Display face — wordmark and list titles only, used with restraint.
+// Display face — wordmark and list titles only. SOFT rounds the terminals and
+// WONK swaps in the slanted, off-kilter forms; without them Fraunces is just
+// another serif. opsz lets it get properly characterful at large sizes.
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
   display: "swap",
+  axes: ["SOFT", "WONK", "opsz"],
 });
 
 // Body/UI face.

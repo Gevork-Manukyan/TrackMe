@@ -1,32 +1,36 @@
 "use client";
 
-/**
- * A list's progress drawn in the app's own vocabulary: one small stamp per
- * place, filled once it's been visited. Vermilion means "stamped" everywhere in
- * this interface, so it's the right colour here — these are miniature stamps,
- * not a generic accent.
- *
- * Dots stop being readable past a dozen or so, at which point the mono fraction
- * beside them already tells the story, so we render nothing.
- */
-const MAX_DOTS = 12;
+import { rankDots } from "@/lib/ink";
 
-export function StampDots({ total, done }: { total: number; done: number }) {
-  if (total === 0 || total > MAX_DOTS) return null;
+/**
+ * A list's stamps as an odometer. The row never exceeds twelve dots, but it keeps
+ * meaning more: once full, dots convert to the next rank one visit at a time.
+ *
+ * Only earned stamps are drawn — never empty slots for places not yet visited.
+ * A list that keeps growing should never render its backlog as guilt.
+ */
+export function StampDots({ stamps }: { stamps: number }) {
+  const dots = rankDots(stamps);
+  if (!dots) return null;
 
   return (
     <div
-      className="mt-3 flex flex-wrap items-center gap-1.5"
-      aria-hidden // the adjacent "3/8" already conveys this to screen readers
+      className="mt-2.5 flex flex-wrap items-center gap-1.5"
+      // The adjacent "14 stamped" already conveys this to screen readers.
+      aria-hidden
     >
-      {Array.from({ length: total }, (_, i) => (
+      {Array.from({ length: dots.upgraded }, (_, i) => (
         <span
-          key={i}
-          className={
-            i < done
-              ? "h-2 w-2 rounded-full bg-stamp"
-              : "h-2 w-2 rounded-full border border-rule"
-          }
+          key={`u${i}`}
+          className="h-2 w-2 rounded-full"
+          style={{ backgroundColor: `var(--rank-${dots.upgradedRank})` }}
+        />
+      ))}
+      {Array.from({ length: dots.remaining }, (_, i) => (
+        <span
+          key={`r${i}`}
+          className="h-2 w-2 rounded-full"
+          style={{ backgroundColor: `var(--rank-${dots.remainingRank})` }}
         />
       ))}
     </div>

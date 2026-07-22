@@ -45,38 +45,153 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* --- Ink: which list is this -------------------------------------------------
+   Eight hues, each with a dark-mode value so a coloured list name stays legible
+   in both themes. Vermilion is now one option among eight rather than *the*
+   accent. Applied via inline style from src/lib/ink.ts, not Tailwind classes:
+   class names built at runtime are never seen by Tailwind's scanner. */
+:root {
+  --ink-raspberry: #c43e5a;
+  --ink-vermilion: #c8402b;
+  --ink-amber: #b37514;
+  --ink-olive: #5f7027;
+  --ink-teal: #12716c;
+  --ink-indigo: #3a4fa0;
+  --ink-plum: #7a3e86;
+  --ink-rose: #b3446e;
+
+  /* --- Rank: how deep have you gone --------------------------------------- */
+  --rank-copper: #b4653a;
+  --rank-silver: #8a96a8;
+  --rank-gold: #c0942a;
+  --rank-emerald: #2f7d63;
+  --rank-violet: #6b4e9b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink-raspberry: #e76a83;
+    --ink-vermilion: #e4573f;
+    --ink-amber: #e0a03c;
+    --ink-olive: #9cb255;
+    --ink-teal: #3fa9a2;
+    --ink-indigo: #7c8fe0;
+    --ink-plum: #b573c0;
+    --ink-rose: #e27ca5;
+
+    --rank-copper: #d08a5c;
+    --rank-silver: #aeb9c8;
+    --rank-gold: #e0b84a;
+    --rank-emerald: #4fa98a;
+    --rank-violet: #9b7fd4;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ink-raspberry: #e76a83;
+  --ink-vermilion: #e4573f;
+  --ink-amber: #e0a03c;
+  --ink-olive: #9cb255;
+  --ink-teal: #3fa9a2;
+  --ink-indigo: #7c8fe0;
+  --ink-plum: #b573c0;
+  --ink-rose: #e27ca5;
+
+  --rank-copper: #d08a5c;
+  --rank-silver: #aeb9c8;
+  --rank-gold: #e0b84a;
+  --rank-emerald: #4fa98a;
+  --rank-violet: #9b7fd4;
+}
+
 body {
   background: var(--ground);
   color: var(--ink);
 }
 
-/* The signature moment: pressing a stamp onto the page. */
+/* Paper. A stamp book is a physical object; without this the cards float on
+   nothing. Deliberately near-invisible — it should register as texture, not
+   pattern. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body::before {
+    opacity: 0.05;
+  }
+}
+:root[data-theme="dark"] body::before {
+  opacity: 0.05;
+}
+
+/* --- The stamp press --------------------------------------------------------
+   This is the whole reward. It fires on every visit, forever, so it gets the
+   entire motion budget: the stamp lands oversized, settles, and the ink sets.
+   Rotation comes in as --rot so the animation can carry it without fighting the
+   inline transform that positions each stamp at its own hand-pressed angle. */
 @keyframes stamp-press {
   0% {
-    transform: scale(1.35);
+    transform: scale(1.5) rotate(calc(var(--rot, 0deg) * 1.6));
     opacity: 0;
+    filter: saturate(1.7);
   }
-  55% {
-    transform: scale(0.92);
+  45% {
+    transform: scale(0.88) rotate(var(--rot, 0deg));
     opacity: 1;
+    filter: saturate(1.5);
+  }
+  70% {
+    transform: scale(1.05) rotate(var(--rot, 0deg));
   }
   100% {
-    transform: scale(1);
+    transform: scale(1) rotate(var(--rot, 0deg));
     opacity: 1;
+    filter: saturate(1);
   }
 }
 
 .stamp-press {
-  animation: stamp-press 260ms cubic-bezier(0.2, 0.8, 0.3, 1);
+  animation: stamp-press 420ms cubic-bezier(0.18, 0.9, 0.28, 1);
+}
+
+/* The row acknowledges the visit too, then gets out of the way. */
+@keyframes ink-wash {
+  0% {
+    background-color: color-mix(in srgb, var(--wash, transparent) 22%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.ink-wash {
+  animation: ink-wash 900ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stamp-press {
+  .stamp-press,
+  .ink-wash {
     animation: none;
   }
   * {
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Fraunces with its axes actually turned up — soft terminals and the wonky
+   forms. Applied where the display face carries personality rather than
+   everywhere, so it stays a choice rather than a texture. */
+.display-wonk {
+  font-variation-settings:
+    "SOFT" 60,
+    "WONK" 1;
 }
 
 /* Keyboard focus must stay visible everywhere. Uses --ink rather than --stamp:

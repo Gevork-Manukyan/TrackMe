@@ -2,14 +2,23 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/dexie";
 import { createItem, deleteCategory } from "@/lib/db/mutations";
+import { inkFor } from "@/lib/ink";
+import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { AddForm } from "./AddForm";
 import { ItemRow } from "./ItemRow";
+import { StampDots } from "./StampDots";
+import { InkPicker } from "./InkPicker";
+import { ConfirmButton } from "./ConfirmButton";
+import { SearchField, useHideVisited } from "./SearchField";
 import { SyncStatus } from "./SyncStatus";
 import { ThemeToggle } from "./ThemeToggle";
+
+/** Below this, a search field is noise rather than help. */
+const SEARCH_THRESHOLD = 8;
 
 export function CategoryDetailView({
   userId,
@@ -19,12 +28,19 @@ export function CategoryDetailView({
   categoryId: string;
 }) {
   const router = useRouter();
-  // The row most recently stamped, which is offered a quick rating.
+  const searchParams = useSearchParams();
+  // Arriving from a home-screen search result lands already filtered, rather
+  // than at the top of sixty rows.
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const search = useDebouncedValue(query).trim().toLowerCase();
+  const hideVisited = useHideVisited();
+
   const [justStamped, setJustStamped] = useState<string | null>(null);
 
   const data = useLiveQuery(async () => {
     const category = await db.categories.get(categoryId);
-    if (!category || category.deletedAt !== null) return { missing: true } as const;
+    if (!category || category.deletedAt !== null)
+      return { missing: true } as const;
 
     const items = await db.items
       .where("categoryId")
@@ -32,10 +48,8 @@ export function CategoryDetailView({
       .filter((i) => i.deletedAt === null)
       .toArray();
 
-    // Strictly the order they were added, and nothing else. Sorting visited
-    // places to the bottom meant a row jumped away the instant it was stamped,
-    // under the finger that just tapped it. A list you wrote stays where you
-    // wrote it; the stamp itself already shows what has been visited.
+    // Strictly the order they were added. Sorting visited places away made a row
+    // jump out from under the finger that had just tapped it.
     items.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 
     return { missing: false, category, items } as const;
@@ -58,7 +72,7 @@ export function CategoryDetailView({
         >
           ← All lists
         </Link>
-        <p className="mt-8 rounded-xl border border-dashed border-rule px-4 py-8 text-center text-slate">
+        <p className="mt-8 rounded-2xl border border-dashed border-rule px-4 py-8 text-center text-slate">
           This list isn&rsquo;t here. It may have been deleted on another device.
         </p>
       </main>
@@ -66,7 +80,26 @@ export function CategoryDetailView({
   }
 
   const { category, items } = data;
-  const done = items.filter((i) => i.visited).length;
+  const ink = inkFor(category.id, category.color);
+  const stamped = items.filter((i) => i.visited).length;
+
+  // Counts and rank always reflect everything; hiding is not forgetting.
+  //
+  // A search deliberately overrides "hide visited". Searching means you are
+  // looking for one specific place, and it is almost certainly one you have
+  // been to — leaving the filter on makes the app answer "nothing matches" for
+  // a place that is right there.
+  const visible = items
+    .filter((i) => (hideVisited && !search ? !i.visited : true))
+    .filter((i) =>
+      search
+        ? i.name.toLowerCase().includes(search) ||
+          i.address?.toLowerCase().includes(search) ||
+          i.notes?.toLowerCase().includes(search)
+        : true,
+    );
+
+  const showSearch = items.length >= SEARCH_THRESHOLD;
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 py-6">
@@ -80,20 +113,24 @@ export function CategoryDetailView({
         <ThemeToggle />
       </div>
 
-      <header className="mt-3 flex items-baseline justify-between gap-3">
-        <h1 className="font-display truncate text-3xl font-semibold tracking-tight">
+      <header className="mt-3">
+        <h1
+          className="font-display display-wonk truncate text-4xl leading-none font-semibold tracking-tight"
+          style={{ color: `var(--ink-${ink})` }}
+        >
           {category.name}
         </h1>
-        <span className="shrink-0 font-mono text-sm text-slate">
-          {done}/{items.length}
-        </span>
+        <p className="mt-2 font-mono text-xs tracking-widest text-slate uppercase">
+          {stamped > 0 ? `${stamped} stamped` : "none stamped yet"}
+        </p>
+        <StampDots stamps={stamped} />
       </header>
 
-      <div className="mt-2 mb-4 min-h-4">
+      <div className="mt-3 mb-4 min-h-4">
         <SyncStatus />
       </div>
 
-      <div className="mb-6">
+      <div className="mb-3">
         <AddForm
           onAdd={(name) => createItem(userId, categoryId, name)}
           placeholder="Add a place"
@@ -101,18 +138,32 @@ export function CategoryDetailView({
         />
       </div>
 
-      {items.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-rule px-4 py-8 text-center text-slate">
-          Nothing here yet. Add the first place.
+      {showSearch && (
+        <div className="mb-5">
+          <SearchField
+            value={query}
+            onChange={setQuery}
+            placeholder="Search this list"
+            hiddenCount={stamped}
+          />
+        </div>
+      )}
+
+      {visible.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-rule px-4 py-8 text-center text-slate">
+          {items.length === 0
+            ? "Nothing here yet. Add the first place."
+            : search
+              ? `Nothing matches “${search}”.`
+              : "Every place here is stamped. Nice."}
         </p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {items.map((item) => (
+        <ul className="flex flex-col gap-2.5">
+          {visible.map((item) => (
             <ItemRow
               key={item.id}
               item={item}
-              // Only ask for a rating on the row just stamped, and only if it
-              // doesn't already have one.
+              ink={ink}
               askForRating={justStamped === item.id && item.rating == null}
               onStamped={() => setJustStamped(item.id)}
               onRatingDone={() => setJustStamped(null)}
@@ -121,19 +172,22 @@ export function CategoryDetailView({
         </ul>
       )}
 
-      {/* Destructive, but quiet: it only reddens on hover so it never competes
-          with "Add" for attention, and never reads as the primary action. */}
-      <div className="mt-10 border-t border-rule pt-4">
-        <button
-          type="button"
-          onClick={async () => {
+      <div className="mt-10 flex flex-col gap-4 border-t border-rule pt-4">
+        <InkPicker categoryId={category.id} current={ink} />
+
+        <ConfirmButton
+          // Otherwise it stretches to the flex column's width and centres itself.
+          className="self-start"
+          label="Delete this list"
+          question={`Delete “${category.name}” and its ${items.length} ${
+            items.length === 1 ? "place" : "places"
+          }?`}
+          confirmLabel="Delete"
+          onConfirm={async () => {
             await deleteCategory(categoryId);
             router.push("/");
           }}
-          className="text-sm text-slate underline underline-offset-2 transition-colors hover:text-stamp"
-        >
-          Delete this list
-        </button>
+        />
       </div>
     </main>
   );

@@ -14,6 +14,7 @@ import type { Prisma } from "@prisma/client";
 type IncomingCategory = {
   id: string;
   name: string;
+  color: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -33,6 +34,20 @@ type IncomingItem = {
   updatedAt: string;
   deletedAt: string | null;
 };
+
+// Mirrors INKS in src/lib/ink.ts. Kept as a set here so the server never trusts
+// a client-supplied colour: these values are interpolated into CSS custom
+// property names on render.
+const INK_NAMES = new Set([
+  "raspberry",
+  "vermilion",
+  "amber",
+  "olive",
+  "teal",
+  "indigo",
+  "plum",
+  "rose",
+]);
 
 const asDate = (v: string | null | undefined) => (v ? new Date(v) : null);
 
@@ -96,6 +111,9 @@ export async function POST(request: NextRequest) {
 
       const data = {
         name: incoming.name,
+        // Constrained to the known palette so a client cannot inject arbitrary
+        // values that would end up in a style attribute.
+        color: INK_NAMES.has(incoming.color ?? "") ? incoming.color : null,
         updatedAt,
         deletedAt: asDate(incoming.deletedAt),
         serverUpdatedAt: now,

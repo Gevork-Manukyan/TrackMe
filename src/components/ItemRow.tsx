@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { StampButton } from "./StampButton";
 import { RatingInput } from "./RatingInput";
 import { QuickRating } from "./QuickRating";
+import { ConfirmButton } from "./ConfirmButton";
 import { deleteItem, updateItemDetails } from "@/lib/db/mutations";
 import type { LocalItem } from "@/lib/db/dexie";
+import type { Ink } from "@/lib/ink";
 
 const fieldClass =
   "rounded-lg border border-rule bg-ground px-2 py-1.5 text-ink placeholder:text-slate/60";
@@ -22,20 +25,28 @@ const labelClass =
  */
 export function ItemRow({
   item,
+  ink,
   askForRating = false,
   onStamped,
   onRatingDone,
 }: {
   item: LocalItem;
+  /** The owning list's ink — the colour this place gets stamped in. */
+  ink: Ink;
   /** True right after this row was stamped, to offer a rating in place. */
   askForRating?: boolean;
   onStamped?: () => void;
   onRatingDone?: () => void;
 }) {
   const meta = [item.address, item.notes].filter(Boolean).join(" · ");
+  const [washing, setWashing] = useState(false);
 
   return (
-    <li className="relative rounded-xl border border-rule bg-card">
+    <li
+      className={`relative rounded-2xl border border-rule bg-card ${washing ? "ink-wash" : ""}`}
+      style={{ ["--wash" as string]: `var(--ink-${ink})` }}
+      onAnimationEnd={() => setWashing(false)}
+    >
       <details>
         {/* min-height reserves room for the stamp, which is absolutely
             positioned and would otherwise overflow a row with no meta line.
@@ -57,7 +68,9 @@ export function ItemRow({
 
           {item.rating != null && (
             <span className="mt-1 block text-sm leading-none">
-              <span className="text-ink">{"★".repeat(item.rating)}</span>
+              <span style={{ color: `var(--ink-${ink})` }}>
+                {"★".repeat(item.rating)}
+              </span>
               <span className="text-rule">{"★".repeat(5 - item.rating)}</span>
             </span>
           )}
@@ -137,13 +150,12 @@ export function ItemRow({
                 Save changes
               </button>
 
-              <button
-                type="button"
-                onClick={() => void deleteItem(item.id)}
-                className="text-sm text-slate underline underline-offset-2 transition-colors hover:text-stamp"
-              >
-                Remove
-              </button>
+              <ConfirmButton
+                label="Remove"
+                question={`Remove “${item.name}”?`}
+                confirmLabel="Remove"
+                onConfirm={() => void deleteItem(item.id)}
+              />
             </div>
           </form>
         </div>
@@ -155,6 +167,7 @@ export function ItemRow({
         <QuickRating
           itemId={item.id}
           name={item.name}
+          ink={ink}
           onDone={() => onRatingDone?.()}
         />
       )}
@@ -166,7 +179,11 @@ export function ItemRow({
           name={item.name}
           visited={item.visited}
           visitedAt={item.visitedAt}
-          onStamped={onStamped}
+          ink={ink}
+          onStamped={() => {
+            setWashing(true);
+            onStamped?.();
+          }}
         />
       </div>
     </li>

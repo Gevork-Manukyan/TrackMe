@@ -30,6 +30,9 @@ model Category {
   id        String   @id @default(uuid()) // client-generated so offline creates get a stable id
   userId    String
   name      String
+  // The list's ink. Null for lists created before colours existed; the client
+  // falls back to a hue derived from the id so nothing looks broken.
+  color     String?
   createdAt DateTime @default(now())
   deletedAt DateTime? // soft delete so deletions sync offline
 

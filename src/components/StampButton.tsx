@@ -2,12 +2,15 @@
 
 import { toggleItemVisited } from "@/lib/db/mutations";
 import { stampDate, stampRotation } from "@/lib/stamp";
+import type { Ink } from "@/lib/ink";
 
 type Props = {
   id: string;
   name: string;
   visited: boolean;
   visitedAt: string | null;
+  /** The owning list's ink — this place is stamped in its colour. */
+  ink: Ink;
   /** Fired only when stamping *on*, so the row can offer a rating. */
   onStamped?: () => void;
 };
@@ -22,6 +25,7 @@ export function StampButton({
   name,
   visited,
   visitedAt,
+  ink,
   onStamped,
 }: Props) {
   const rotation = stampRotation(id);
@@ -43,10 +47,17 @@ export function StampButton({
     >
       {visited ? (
         <span
-          className="stamp-press grid h-14 w-14 place-items-center rounded-full border-2 border-stamp text-stamp"
-          style={{ transform: `rotate(${rotation}deg)` }}
+          className="stamp-press grid h-14 w-14 place-items-center rounded-full border-2"
+          // --rot feeds the keyframes so the press animation carries this
+          // place's own hand-pressed angle instead of fighting it.
+          style={{
+            ["--rot" as string]: `${rotation}deg`,
+            transform: `rotate(${rotation}deg)`,
+            borderColor: `var(--ink-${ink})`,
+            color: `var(--ink-${ink})`,
+          }}
         >
-          <span className="grid h-11 w-11 place-items-center rounded-full border border-stamp/60 leading-none">
+          <span className="grid h-11 w-11 place-items-center rounded-full border leading-none [border-color:currentColor] opacity-80">
             <span className="font-mono text-[9px] tracking-[0.14em]">
               {stamp?.month ?? "VISIT"}
             </span>
