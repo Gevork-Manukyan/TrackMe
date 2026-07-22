@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Favicon variant of the stamp. Same identity as assets/icon.svg (ring +
+       check) but redrawn for 16-32px: the inner ring is dropped and every
+       stroke is roughly doubled, because fine detail turns to mush at tab size.
+       Kept square and untilted — symmetric shapes alias more cleanly when tiny. -->
+  <rect width="512" height="512" fill="#16233B"/>
+
+  <circle cx="256" cy="256" r="188" fill="none" stroke="#C8402B" stroke-width="46"/>
+
+  <path d="M168 264 L230 326 L348 194"
+        fill="none"
+        stroke="#C8402B"
+        stroke-width="62"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+</svg>
