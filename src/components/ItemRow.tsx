@@ -128,7 +128,7 @@ export function ItemRow({
 
             <div className="flex flex-col gap-1">
               <span className={labelClass}>Rating</span>
-              <RatingInput defaultValue={item.rating} />
+              <RatingInput defaultValue={item.rating} ink={ink} />
             </div>
 
             <label className="flex flex-col gap-1">
@@ -145,13 +145,24 @@ export function ItemRow({
             <div className="mt-1 flex items-center justify-between gap-3">
               <button
                 type="submit"
-                className="rounded-lg bg-ink px-3.5 py-2 text-sm font-medium text-ground"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-sm font-medium text-ground"
               >
-                Save changes
+                <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+                  <path
+                    d="M5 12.5 10 17.5 19 7"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Save
               </button>
 
               <ConfirmButton
-                label="Remove"
+                icon
+                label={`Remove ${item.name}`}
                 question={`Remove “${item.name}”?`}
                 confirmLabel="Remove"
                 onConfirm={() => void deleteItem(item.id)}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Ink } from "@/lib/ink";
 
 /**
  * Tappable star rating. Feeds the surrounding form through a hidden input, so
@@ -9,7 +10,14 @@ import { useState } from "react";
  * Tapping the current rating again clears it — otherwise a rating set by
  * accident could never be removed.
  */
-export function RatingInput({ defaultValue }: { defaultValue: number | null }) {
+export function RatingInput({
+  defaultValue,
+  ink,
+}: {
+  defaultValue: number | null;
+  /** Filled stars use the list's ink, matching the row's static display. */
+  ink: Ink;
+}) {
   const [value, setValue] = useState(defaultValue ?? 0);
   const [preview, setPreview] = useState(0);
 
@@ -32,9 +40,8 @@ export function RatingInput({ defaultValue }: { defaultValue: number | null }) {
             value === n ? `Clear rating` : `Rate ${n} out of 5`
           }
           aria-pressed={n <= value}
-          className={`grid h-9 w-8 place-items-center text-xl leading-none transition-colors ${
-            n <= shown ? "text-ink" : "text-rule hover:text-slate"
-          }`}
+          className="grid h-9 w-8 place-items-center text-xl leading-none transition-colors"
+          style={{ color: n <= shown ? `var(--ink-${ink})` : "var(--rule)" }}
         >
           ★
         </button>

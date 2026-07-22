@@ -13,6 +13,7 @@ import { ItemRow } from "./ItemRow";
 import { StampDots } from "./StampDots";
 import { InkPicker } from "./InkPicker";
 import { ConfirmButton } from "./ConfirmButton";
+import { Menu } from "./Menu";
 import { SearchField, useHideVisited } from "./SearchField";
 import { SyncStatus } from "./SyncStatus";
 import { ThemeToggle } from "./ThemeToggle";
@@ -110,7 +111,30 @@ export function CategoryDetailView({
         >
           ← All lists
         </Link>
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <Menu label="List options">
+            {(close) => (
+              <div className="flex flex-col gap-4">
+                <InkPicker categoryId={category.id} current={ink} />
+                <div className="border-t border-rule pt-3">
+                  <ConfirmButton
+                    label="Delete this list"
+                    question={`Delete “${category.name}” and its ${items.length} ${
+                      items.length === 1 ? "place" : "places"
+                    }?`}
+                    confirmLabel="Delete"
+                    onConfirm={async () => {
+                      close();
+                      await deleteCategory(categoryId);
+                      router.push("/");
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </Menu>
+        </div>
       </div>
 
       <header className="mt-3">
@@ -172,23 +196,6 @@ export function CategoryDetailView({
         </ul>
       )}
 
-      <div className="mt-10 flex flex-col gap-4 border-t border-rule pt-4">
-        <InkPicker categoryId={category.id} current={ink} />
-
-        <ConfirmButton
-          // Otherwise it stretches to the flex column's width and centres itself.
-          className="self-start"
-          label="Delete this list"
-          question={`Delete “${category.name}” and its ${items.length} ${
-            items.length === 1 ? "place" : "places"
-          }?`}
-          confirmLabel="Delete"
-          onConfirm={async () => {
-            await deleteCategory(categoryId);
-            router.push("/");
-          }}
-        />
-      </div>
     </main>
   );
 }

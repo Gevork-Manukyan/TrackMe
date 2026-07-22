@@ -16,11 +16,11 @@ export function InkPicker({
   current: Ink;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col gap-2">
       <span className="font-mono text-[11px] tracking-widest text-slate uppercase">
         Ink
       </span>
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex items-center justify-between">
         {INKS.map((ink) => {
           const selected = ink === current;
           return (

@@ -16,16 +16,42 @@ export function ConfirmButton({
   confirmLabel,
   onConfirm,
   className = "",
+  /** Render the trigger as an icon button instead of a text link. */
+  icon = false,
 }: {
   label: string;
   question: string;
   confirmLabel: string;
   onConfirm: () => void | Promise<void>;
   className?: string;
+  icon?: boolean;
 }) {
   const [armed, setArmed] = useState(false);
 
   if (!armed) {
+    if (icon) {
+      return (
+        <button
+          type="button"
+          onClick={() => setArmed(true)}
+          aria-label={label}
+          title={label}
+          className={`grid h-9 w-9 place-items-center rounded-lg text-slate transition-colors hover:bg-stamp/10 hover:text-stamp ${className}`}
+        >
+          <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden>
+            <path
+              d="M4 7h16M10 7V5.5A1.5 1.5 0 0 1 11.5 4h1A1.5 1.5 0 0 1 14 5.5V7M6 7l1 12.5A1.5 1.5 0 0 0 8.5 21h7a1.5 1.5 0 0 0 1.5-1.5L18 7"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      );
+    }
+
     return (
       <button
         type="button"

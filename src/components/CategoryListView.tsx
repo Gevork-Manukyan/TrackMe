@@ -14,6 +14,7 @@ import { RecentStamps, type RecentStamp } from "./RecentStamps";
 import { SyncStatus } from "./SyncStatus";
 import { ThemeToggle } from "./ThemeToggle";
 import { SignOutButton } from "./SignOutButton";
+import { Menu } from "./Menu";
 
 /** Below this, a search field is noise rather than help. */
 const SEARCH_THRESHOLD = 8;
@@ -96,7 +97,19 @@ export function CategoryListView({ userId }: { userId: string }) {
         <h1 className="font-display display-wonk text-[2.5rem] leading-none font-semibold tracking-tight">
           TrackMe
         </h1>
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <Menu label="Account options">
+            {() => (
+              <div className="flex flex-col gap-2">
+                <p className="font-mono text-[11px] tracking-widest text-slate uppercase">
+                  Account
+                </p>
+                <SignOutButton />
+              </div>
+            )}
+          </Menu>
+        </div>
       </header>
 
       <div className="mb-5 min-h-4">
@@ -167,10 +180,6 @@ export function CategoryListView({ userId }: { userId: string }) {
         </ul>
       )}
 
-      {/* Signing out is rare — it belongs at the end, not competing with the wordmark. */}
-      <div className="mt-auto pt-10">
-        <SignOutButton />
-      </div>
     </main>
   );
 }

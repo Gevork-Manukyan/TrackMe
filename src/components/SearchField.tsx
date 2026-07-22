@@ -58,7 +58,8 @@ export function SearchField({
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-rule bg-card px-3">
+      {/* The ring goes on the bar, not the input — see .field-wrap in globals.css. */}
+      <div className="field-wrap flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-rule bg-card px-3">
         <svg
           viewBox="0 0 24 24"
           className="h-4 w-4 shrink-0 text-slate"
@@ -88,7 +89,7 @@ export function SearchField({
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}
-          className="min-w-0 flex-1 bg-transparent py-2.5 text-ink placeholder:text-slate/70 focus:outline-none"
+          className="ring-on-wrapper min-w-0 flex-1 bg-transparent py-2.5 text-ink placeholder:text-slate/70"
         />
       </div>
 

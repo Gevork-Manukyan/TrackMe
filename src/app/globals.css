@@ -203,6 +203,37 @@ body::before {
   border-radius: 3px;
 }
 
+/* A control whose focus ring belongs on its wrapper rather than on itself.
+   The search input sits inside a bordered bar alongside an icon; ringing the
+   input alone drew a rectangle floating *inside* the bar, misaligned with the
+   thing it was supposed to be highlighting. */
+.ring-on-wrapper:focus-visible {
+  outline: none;
+}
+
+/* Scoped to a direct input child: the add-field shares its bar with a button,
+   and that button should still get its own ring rather than lighting up the
+   whole bar. */
+.field-wrap:has(> input:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Tailwind v4's preflight sets buttons to `cursor: default`. Interactive things
+   should look interactive, so this restores it in one place rather than
+   sprinkling cursor-pointer across every component and missing some. */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+summary,
+label:has(input[type="checkbox"]),
+a[href] {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
 /* Native marker removed so the whole row can act as the disclosure control. */
 summary::-webkit-details-marker {
   display: none;

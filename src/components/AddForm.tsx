@@ -26,7 +26,7 @@ export function AddForm({ onAdd, placeholder, submitLabel }: Props) {
         formRef.current?.reset();
         await onAdd(name);
       }}
-      className="flex items-center gap-2 rounded-xl border border-rule bg-card p-2"
+      className="field-wrap flex items-center gap-2 rounded-xl border border-rule bg-card p-2"
     >
       <input
         name="name"
@@ -34,7 +34,7 @@ export function AddForm({ onAdd, placeholder, submitLabel }: Props) {
         maxLength={120}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="min-w-0 flex-1 bg-transparent px-2 py-2 text-ink placeholder:text-slate/70 focus:outline-none"
+        className="ring-on-wrapper min-w-0 flex-1 bg-transparent px-2 py-2 text-ink placeholder:text-slate/70"
       />
       <button
         type="submit"
