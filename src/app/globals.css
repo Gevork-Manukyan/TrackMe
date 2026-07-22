@@ -10,8 +10,9 @@
   --rule: #d3dae3; /* hairlines, empty-slot dashes */
 }
 
+/* 1. The system preference — unless the reader has explicitly chosen light. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --ground: #0e1626;
     --card: #182338;
     --ink: #e8ecf3;
@@ -19,6 +20,16 @@
     --stamp: #e4573f;
     --rule: #2a3852;
   }
+}
+
+/* 2. An explicit choice from the theme toggle, which wins over the system. */
+:root[data-theme="dark"] {
+  --ground: #0e1626;
+  --card: #182338;
+  --ink: #e8ecf3;
+  --slate: #93a2bc;
+  --stamp: #e4573f;
+  --rule: #2a3852;
 }
 
 @theme inline {

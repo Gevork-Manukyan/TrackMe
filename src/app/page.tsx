@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { createCategory } from "@/lib/actions/categories";
 import { AddForm } from "@/components/AddForm";
 import { StampDots } from "@/components/StampDots";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default async function Home() {
   const user = await requireUser();
@@ -27,15 +28,18 @@ export default async function Home() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">
-      <header className="mb-6 flex items-baseline justify-between gap-3">
+      <header className="mb-6 flex items-center justify-between gap-3">
         <h1 className="font-display text-3xl font-semibold tracking-tight">
           TrackMe
         </h1>
-        {totalStamped > 0 && (
-          <span className="font-mono text-xs tracking-widest text-slate uppercase">
-            {totalStamped} stamped
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {totalStamped > 0 && (
+            <span className="font-mono text-xs tracking-widest text-slate uppercase">
+              {totalStamped} stamped
+            </span>
+          )}
+          <ThemeToggle />
+        </div>
       </header>
 
       <div className="mb-6">

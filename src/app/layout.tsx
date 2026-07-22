@@ -53,7 +53,24 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${fraunces.variable} ${schibsted.variable} ${geistMono.variable} h-full antialiased`}
+      // The inline script below stamps data-theme onto this element before
+      // React hydrates, so the server HTML legitimately differs here. This
+      // suppresses the warning for <html>'s own attributes only — mismatches
+      // anywhere inside the tree are still reported.
+      suppressHydrationWarning
     >
+      <head>
+        {/*
+          Applies a saved theme during HTML parse, before the first paint.
+          Without this the page renders with the system theme and then snaps to
+          the saved one — a visible flash on every navigation.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("trackme-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="font-sans min-h-full flex flex-col">
         {children}
         <ServiceWorkerRegistrar />

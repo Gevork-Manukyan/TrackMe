@@ -1,4 +1,5 @@
 import { StampButton } from "./StampButton";
+import { RatingInput } from "./RatingInput";
 import { deleteItem, updateItemDetails } from "@/lib/actions/items";
 import { stampDate } from "@/lib/stamp";
 
@@ -96,30 +97,21 @@ export function ItemRow({ item }: { item: ItemRowData }) {
               />
             </label>
 
-            <div className="flex gap-2">
-              <label className="flex flex-1 flex-col gap-1">
-                <span className={labelClass}>Rating</span>
-                <input
-                  name="rating"
-                  type="number"
-                  min={1}
-                  max={5}
-                  defaultValue={item.rating ?? ""}
-                  placeholder="1–5"
-                  className={`w-full ${fieldClass}`}
-                />
-              </label>
-              <label className="flex flex-[2] flex-col gap-1">
-                <span className={labelClass}>Link</span>
-                <input
-                  name="url"
-                  type="url"
-                  defaultValue={item.url ?? ""}
-                  placeholder="https://"
-                  className={`w-full ${fieldClass}`}
-                />
-              </label>
+            <div className="flex flex-col gap-1">
+              <span className={labelClass}>Rating</span>
+              <RatingInput defaultValue={item.rating} />
             </div>
+
+            <label className="flex flex-col gap-1">
+              <span className={labelClass}>Link</span>
+              <input
+                name="url"
+                type="url"
+                defaultValue={item.url ?? ""}
+                placeholder="https://"
+                className={`w-full ${fieldClass}`}
+              />
+            </label>
 
             <div className="mt-1 flex items-center justify-between gap-3">
               <button

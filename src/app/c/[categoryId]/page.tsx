@@ -6,6 +6,7 @@ import { createItem } from "@/lib/actions/items";
 import { deleteCategory } from "@/lib/actions/categories";
 import { AddForm } from "@/components/AddForm";
 import { ItemRow } from "@/components/ItemRow";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default async function CategoryPage({
   params,
@@ -33,12 +34,15 @@ export default async function CategoryPage({
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 py-6">
-      <Link
-        href="/"
-        className="font-mono text-xs tracking-widest text-slate uppercase"
-      >
-        ← All lists
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link
+          href="/"
+          className="font-mono text-xs tracking-widest text-slate uppercase"
+        >
+          ← All lists
+        </Link>
+        <ThemeToggle />
+      </div>
 
       <header className="mt-3 mb-6 flex items-baseline justify-between gap-3">
         <h1 className="font-display truncate text-3xl font-semibold tracking-tight">
