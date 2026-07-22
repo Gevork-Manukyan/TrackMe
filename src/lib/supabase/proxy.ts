@@ -38,7 +38,12 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute =
     pathname.startsWith("/login") || pathname.startsWith("/auth");
 
-  if (!user && !isAuthRoute) {
+  // API routes must answer for themselves. Redirecting them would hand fetch()
+  // an HTML login page with a 200, so the client could never tell an expired
+  // session from a real failure — /api/sync returns a proper 401 instead.
+  const isApiRoute = pathname.startsWith("/api");
+
+  if (!user && !isAuthRoute && !isApiRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

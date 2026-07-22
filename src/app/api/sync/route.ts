@@ -64,6 +64,14 @@ export async function POST(request: NextRequest) {
   const incomingItems = body.changes?.items ?? [];
   const now = new Date();
 
+  // The mirror row exists so Category/Item foreign keys resolve. This is the only
+  // place that needs it, so it is created here rather than on every page render.
+  await prisma.user.upsert({
+    where: { id: user.id },
+    update: { email: user.email },
+    create: { id: user.id, email: user.email },
+  });
+
   // ---- Push ----------------------------------------------------------------
   // Every write is scoped to the session user. A client-supplied userId is never
   // read; that is the entire ownership boundary.

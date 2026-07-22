@@ -8,6 +8,8 @@ type Props = {
   name: string;
   visited: boolean;
   visitedAt: string | null;
+  /** Fired only when stamping *on*, so the row can offer a rating. */
+  onStamped?: () => void;
 };
 
 /**
@@ -15,14 +17,24 @@ type Props = {
  * to IndexedDB, and useLiveQuery re-renders from it immediately, so the stamp
  * appears as fast as it ever did without a server round trip in the path.
  */
-export function StampButton({ id, name, visited, visitedAt }: Props) {
+export function StampButton({
+  id,
+  name,
+  visited,
+  visitedAt,
+  onStamped,
+}: Props) {
   const rotation = stampRotation(id);
   const stamp = visitedAt ? stampDate(new Date(visitedAt)) : null;
 
   return (
     <button
       type="button"
-      onClick={() => void toggleItemVisited(id, !visited)}
+      onClick={() => {
+        const next = !visited;
+        void toggleItemVisited(id, next);
+        if (next) onStamped?.();
+      }}
       aria-pressed={visited}
       aria-label={
         visited ? `Remove the stamp from ${name}` : `Stamp ${name} as visited`

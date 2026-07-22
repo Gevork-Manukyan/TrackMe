@@ -2,6 +2,7 @@
 
 import { StampButton } from "./StampButton";
 import { RatingInput } from "./RatingInput";
+import { QuickRating } from "./QuickRating";
 import { deleteItem, updateItemDetails } from "@/lib/db/mutations";
 import type { LocalItem } from "@/lib/db/dexie";
 
@@ -19,7 +20,18 @@ const labelClass =
  * <details> is hidden while closed, and anything inside <summary> would toggle
  * the panel when pressed.
  */
-export function ItemRow({ item }: { item: LocalItem }) {
+export function ItemRow({
+  item,
+  askForRating = false,
+  onStamped,
+  onRatingDone,
+}: {
+  item: LocalItem;
+  /** True right after this row was stamped, to offer a rating in place. */
+  askForRating?: boolean;
+  onStamped?: () => void;
+  onRatingDone?: () => void;
+}) {
   const meta = [item.address, item.notes].filter(Boolean).join(" · ");
 
   return (
@@ -137,6 +149,16 @@ export function ItemRow({ item }: { item: LocalItem }) {
         </div>
       </details>
 
+      {/* Also outside <details>, for the same reason as the stamp: content inside
+          is hidden while the row is collapsed, which is when this must show. */}
+      {askForRating && (
+        <QuickRating
+          itemId={item.id}
+          name={item.name}
+          onDone={() => onRatingDone?.()}
+        />
+      )}
+
       {/* Outside <details> so it stays visible when collapsed and never toggles it. */}
       <div className="absolute top-2.5 right-3">
         <StampButton
@@ -144,6 +166,7 @@ export function ItemRow({ item }: { item: LocalItem }) {
           name={item.name}
           visited={item.visited}
           visitedAt={item.visitedAt}
+          onStamped={onStamped}
         />
       </div>
     </li>

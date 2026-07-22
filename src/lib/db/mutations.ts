@@ -151,6 +151,16 @@ export async function updateItemDetails(
   touched();
 }
 
+/** Sets only the rating — used by the prompt that appears right after stamping. */
+export async function setItemRating(id: string, rating: number | null) {
+  await db.items.update(id, {
+    rating: rating != null && rating >= 1 && rating <= 5 ? rating : null,
+    updatedAt: now(),
+    dirty: 1,
+  });
+  touched();
+}
+
 export async function deleteItem(id: string) {
   const timestamp = now();
   await db.items.update(id, {

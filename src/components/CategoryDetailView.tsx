@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db/dexie";
@@ -18,6 +19,8 @@ export function CategoryDetailView({
   categoryId: string;
 }) {
   const router = useRouter();
+  // The row most recently stamped, which is offered a quick rating.
+  const [justStamped, setJustStamped] = useState<string | null>(null);
 
   const data = useLiveQuery(async () => {
     const category = await db.categories.get(categoryId);
@@ -29,11 +32,11 @@ export function CategoryDetailView({
       .filter((i) => i.deletedAt === null)
       .toArray();
 
-    // Unvisited first, then oldest first — same order the server used to return.
-    items.sort((a, b) => {
-      if (a.visited !== b.visited) return a.visited ? 1 : -1;
-      return a.createdAt.localeCompare(b.createdAt);
-    });
+    // Strictly the order they were added, and nothing else. Sorting visited
+    // places to the bottom meant a row jumped away the instant it was stamped,
+    // under the finger that just tapped it. A list you wrote stays where you
+    // wrote it; the stamp itself already shows what has been visited.
+    items.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 
     return { missing: false, category, items } as const;
   }, [categoryId]);
@@ -105,7 +108,15 @@ export function CategoryDetailView({
       ) : (
         <ul className="flex flex-col gap-2">
           {items.map((item) => (
-            <ItemRow key={item.id} item={item} />
+            <ItemRow
+              key={item.id}
+              item={item}
+              // Only ask for a rating on the row just stamped, and only if it
+              // doesn't already have one.
+              askForRating={justStamped === item.id && item.rating == null}
+              onStamped={() => setJustStamped(item.id)}
+              onRatingDone={() => setJustStamped(null)}
+            />
           ))}
         </ul>
       )}
