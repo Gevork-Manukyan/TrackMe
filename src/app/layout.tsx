@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Schibsted_Grotesk, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
@@ -77,6 +78,7 @@ export default function RootLayout({
       <body className="font-sans min-h-full flex flex-col">
         {children}
         <ServiceWorkerRegistrar />
+        <Analytics />
       </body>
     </html>
   );
