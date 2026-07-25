@@ -26,7 +26,7 @@ const STEPS = [
  */
 export function Landing() {
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-1 flex-col justify-center gap-10 px-6 py-12 sm:max-w-lg">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center gap-10 px-6 py-12 sm:max-w-lg">
       <header className="flex flex-col items-center text-center">
         <Logo className="h-20 w-20 text-stamp" title="" />
         <h1 className="font-display display-wonk mt-5 text-5xl font-semibold tracking-tight">

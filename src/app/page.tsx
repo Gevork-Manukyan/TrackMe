@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CategoryListView } from "@/components/CategoryListView";
 import { SyncProvider } from "@/components/SyncProvider";
 import { Landing } from "@/components/Landing";
+import { Footer } from "@/components/Footer";
 
 /**
  * The root is now dual-purpose: signed-out visitors see the marketing landing,
@@ -16,7 +17,12 @@ export default async function Home() {
   const userId = data?.claims?.sub;
 
   if (typeof userId !== "string") {
-    return <Landing />;
+    return (
+      <>
+        <Landing />
+        <Footer />
+      </>
+    );
   }
 
   return (

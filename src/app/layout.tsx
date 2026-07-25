@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Schibsted_Grotesk, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
-import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 // Display face — wordmark and list titles only. SOFT rounds the terminals and
@@ -124,7 +123,6 @@ export default function RootLayout({
       </head>
       <body className="font-sans flex min-h-[100dvh] flex-col">
         {children}
-        <Footer />
         <ServiceWorkerRegistrar />
         <Analytics />
       </body>

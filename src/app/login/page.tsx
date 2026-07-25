@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/Logo";
+import { Footer } from "@/components/Footer";
 
 function LoginForm() {
   const router = useRouter();
@@ -152,8 +153,11 @@ export default function LoginPage() {
   // useSearchParams needs a Suspense boundary so it doesn't opt the whole route
   // into client-side rendering during prerender.
   return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
+    <>
+      <Suspense>
+        <LoginForm />
+      </Suspense>
+      <Footer />
+    </>
   );
 }
