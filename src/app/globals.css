@@ -53,7 +53,9 @@
 :root {
   --ink-raspberry: #c43e5a;
   --ink-vermilion: #c8402b;
-  --ink-amber: #b37514;
+  /* Darkened from #b37514 (3.84:1, failed AA) so the hue clears 4.5:1 as small
+     text on white — it doubles as the stamped-date colour in ItemRow. */
+  --ink-amber: #9f6510;
   --ink-olive: #5f7027;
   --ink-teal: #12716c;
   --ink-indigo: #3a4fa0;
@@ -71,7 +73,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --ink-raspberry: #e76a83;
-    --ink-vermilion: #e4573f;
+    --ink-vermilion: #e86449;
     --ink-amber: #e0a03c;
     --ink-olive: #9cb255;
     --ink-teal: #3fa9a2;
@@ -89,7 +91,7 @@
 
 :root[data-theme="dark"] {
   --ink-raspberry: #e76a83;
-  --ink-vermilion: #e4573f;
+  --ink-vermilion: #e86449;
   --ink-amber: #e0a03c;
   --ink-olive: #9cb255;
   --ink-teal: #3fa9a2;
