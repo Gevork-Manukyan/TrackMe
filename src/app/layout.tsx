@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
 import { Fraunces, Schibsted_Grotesk, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
@@ -49,17 +48,11 @@ export const viewport: Viewport = {
   ],
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // The proxy mints a per-request nonce and exposes it here. The inline theme
-  // script below is parser-inserted, so strict-dynamic won't cover it — it needs
-  // the nonce explicitly to run under the CSP. Null on routes the proxy skips
-  // (e.g. /offline), which also have no CSP, so the script still runs there.
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
-
   return (
     <html
       lang="en"
@@ -77,7 +70,6 @@ export default async function RootLayout({
           the saved one — a visible flash on every navigation.
         */}
         <script
-          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `try{var t=localStorage.getItem("trackme-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`,
           }}

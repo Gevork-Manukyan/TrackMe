@@ -1,19 +1,28 @@
-import { requireUser } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { CategoryListView } from "@/components/CategoryListView";
 import { SyncProvider } from "@/components/SyncProvider";
+import { Landing } from "@/components/Landing";
 
 /**
- * A shell, not a data source. requireUser() still runs so an unauthenticated
- * request never renders, but the lists themselves come from IndexedDB on the
- * client — that is what lets the page work with no connection.
+ * The root is now dual-purpose: signed-out visitors see the marketing landing,
+ * signed-in visitors see their lists. It's a shell either way — the lists come
+ * from IndexedDB on the client, which is what lets the app work with no
+ * connection. We check the session without redirecting (the proxy already lets
+ * `/` through while signed out) so the landing can render.
  */
 export default async function Home() {
-  const user = await requireUser();
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims?.sub;
+
+  if (typeof userId !== "string") {
+    return <Landing />;
+  }
 
   return (
     <>
-      <SyncProvider userId={user.id} />
-      <CategoryListView userId={user.id} />
+      <SyncProvider userId={userId} />
+      <CategoryListView userId={userId} />
     </>
   );
 }

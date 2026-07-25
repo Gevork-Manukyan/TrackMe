@@ -1,6 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// SHA-256 of the inline theme <script> in app/layout.tsx (the pre-hydration
+// data-theme setter). That script is static, so we allow it by hash rather than a
+// nonce: a nonce on an inline script causes a React hydration mismatch (React
+// strips the nonce value client-side). Hashes are still honoured under
+// strict-dynamic. If the script body changes, recompute this hash.
+const THEME_SCRIPT_HASH = "'sha256-3PblYBO/FLr125KS4+Ole/LG2OkhTh2KR11Jex/aDho='";
+
 /**
  * Builds a per-request Content-Security-Policy.
  *
@@ -36,7 +43,7 @@ function buildCsp(nonce: string): string {
   return [
     `default-src 'self'`,
     // 'unsafe-eval' is only needed in dev, where React uses eval for better stacks.
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' ${THEME_SCRIPT_HASH} 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
     `style-src 'self' 'unsafe-inline'`,
     `img-src 'self' data: blob:`,
     `font-src 'self'`,
@@ -102,12 +109,16 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute =
     pathname.startsWith("/login") || pathname.startsWith("/auth");
 
+  // The root is public: signed-out visitors see the landing page there (the page
+  // itself decides landing-vs-lists based on the session), so it must not bounce.
+  const isPublicRoute = pathname === "/";
+
   // API routes must answer for themselves. Redirecting them would hand fetch()
   // an HTML login page with a 200, so the client could never tell an expired
   // session from a real failure — /api/sync returns a proper 401 instead.
   const isApiRoute = pathname.startsWith("/api");
 
-  if (!user && !isAuthRoute && !isApiRoute) {
+  if (!user && !isAuthRoute && !isPublicRoute && !isApiRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     const redirect = NextResponse.redirect(url);
