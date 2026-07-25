@@ -28,9 +28,55 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+// The nonce-based CSP (src/lib/supabase/proxy.ts) requires dynamic rendering:
+// Next can only stamp the per-request nonce onto its scripts during SSR, so a
+// statically prerendered page would ship scripts the CSP then blocks — a broken,
+// non-interactive page in production. Force every route dynamic. (The app is
+// auth-gated and goes through the proxy on every request, so it's effectively
+// dynamic anyway.)
+export const dynamic = "force-dynamic";
+
+// Falls back to the production domain so previews unfurl and canonical URLs
+// resolve even if the env var isn't set (e.g. it's not configured on Vercel yet).
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://trackme.gevorkmanukyan.com";
+
 export const metadata: Metadata = {
-  title: "TrackMe",
-  description: "Track the places you want to try, and check them off.",
+  // Resolves every relative URL below (canonical, OG/Twitter images) to absolute.
+  // Without it, link-preview scrapers can't fetch relative image paths.
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "TrackMe — a passport for the places you want to try",
+    template: "%s · TrackMe",
+  },
+  description:
+    "Keep a running list of the places you want to try, and stamp each one when you go. A playful passport for your city — and it works offline.",
+  applicationName: "TrackMe",
+  keywords: [
+    "places to try",
+    "bucket list",
+    "restaurant list",
+    "travel checklist",
+    "passport stamps",
+    "offline app",
+  ],
+  authors: [{ name: "Gevork Manukyan" }],
+  creator: "Gevork Manukyan",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "TrackMe",
+    title: "TrackMe — a passport for the places you want to try",
+    description:
+      "Keep a running list of the places you want to try, and stamp each one when you go.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TrackMe — a passport for the places you want to try",
+    description:
+      "Keep a running list of the places you want to try, and stamp each one when you go.",
+  },
   appleWebApp: {
     capable: true,
     title: "TrackMe",
