@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/Logo";
@@ -64,8 +65,14 @@ function LoginForm() {
   return (
     <main className="mx-auto flex max-w-sm flex-1 flex-col justify-center gap-6 p-6">
       <div>
-        {/* The mark is the stamp itself — the thing the whole app is about. */}
-        <Logo className="mb-4 h-11 w-11 text-stamp" title="" />
+        {/* The mark links home; signed out, that's the landing page. */}
+        <Link
+          href="/"
+          aria-label="TrackMe — home"
+          className="mb-4 inline-block w-fit rounded-md transition-opacity hover:opacity-80"
+        >
+          <Logo className="h-11 w-11 text-stamp" title="" />
+        </Link>
 
         <h1 className="font-display text-4xl font-semibold tracking-tight">
           TrackMe

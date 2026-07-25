@@ -15,6 +15,7 @@ import { SyncStatus } from "./SyncStatus";
 import { ThemeToggle } from "./ThemeToggle";
 import { SignOutButton } from "./SignOutButton";
 import { Menu } from "./Menu";
+import { Logo } from "./Logo";
 
 /** Below this, a search field is noise rather than help. */
 const SEARCH_THRESHOLD = 8;
@@ -81,9 +82,13 @@ export function CategoryListView({ userId }: { userId: string }) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6 sm:max-w-2xl">
       <header className="mb-1 flex items-center justify-between gap-3">
-        <h1 className="font-display display-wonk text-[2.5rem] leading-none font-semibold tracking-tight">
-          TrackMe
-        </h1>
+        {/* Decorative here — no link, unlike the mark on the signed-out pages. */}
+        <div className="flex items-center gap-2.5">
+          <Logo className="h-9 w-9 shrink-0 text-stamp" title="" />
+          <h1 className="font-display display-wonk text-[2.5rem] leading-none font-semibold tracking-tight">
+            TrackMe
+          </h1>
+        </div>
         <div className="flex items-center gap-1">
           <ThemeToggle />
           <Menu label="Account options">
