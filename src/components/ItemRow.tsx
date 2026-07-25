@@ -6,6 +6,7 @@ import { RatingInput } from "./RatingInput";
 import { QuickRating } from "./QuickRating";
 import { ConfirmButton } from "./ConfirmButton";
 import { deleteItem, updateItemDetails } from "@/lib/db/mutations";
+import { stampDate } from "@/lib/stamp";
 import type { LocalItem } from "@/lib/db/dexie";
 import type { Ink } from "@/lib/ink";
 
@@ -77,6 +78,15 @@ export function ItemRow({
         </summary>
 
         <div className="border-t border-rule px-4 pt-3 pb-4">
+          {item.visited && item.visitedAt && (
+            <p className="mb-3 font-mono text-[11px] tracking-widest text-slate uppercase">
+              Stamped{" "}
+              <span style={{ color: `var(--ink-${ink})` }}>
+                {stampDate(new Date(item.visitedAt)).month}{" "}
+                {stampDate(new Date(item.visitedAt)).day}
+              </span>
+            </p>
+          )}
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -96,7 +106,7 @@ export function ItemRow({
             className="flex flex-col gap-2.5"
           >
             <label className="flex flex-col gap-1">
-              <span className={labelClass}>Name</span>
+              <span className={labelClass}>Place</span>
               <input
                 name="name"
                 defaultValue={item.name}

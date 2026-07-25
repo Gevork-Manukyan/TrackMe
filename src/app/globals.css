@@ -104,31 +104,75 @@
   --rank-violet: #9b7fd4;
 }
 
+/* A soft dome of light at the top centre lifts the page off a flat fill and
+   gives the paper somewhere to catch the light. */
 body {
-  background: var(--ground);
+  background:
+    radial-gradient(
+      130% 90% at 50% -10%,
+      color-mix(in srgb, var(--card) 55%, var(--ground)) 0%,
+      var(--ground) 55%
+    );
+  background-attachment: fixed;
   color: var(--ink);
 }
 
-/* Paper. A stamp book is a physical object; without this the cards float on
-   nothing. Deliberately near-invisible — it should register as texture, not
-   pattern. */
-body::before {
+/* Two texture layers behind everything. A stamp book is a physical object; flat
+   colour is the fastest way to read as a mock-up.
+     ::before — fine paper grain.
+     ::after  — a faint engraved diagonal ruling, the security-print motif of a
+                passport page. Both stay quiet enough to be felt, not read. */
+body::before,
+body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
+}
+
+body::before {
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body::after {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--rule) 55%, transparent) 0 1px,
+    transparent 1px 11px
+  );
+  /* --rule is already low-contrast; this keeps the ruling a whisper on top. */
   opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body::before {
-    opacity: 0.05;
+    opacity: 0.09;
+  }
+  :root:not([data-theme="light"]) body::after {
+    opacity: 0.06;
   }
 }
 :root[data-theme="dark"] body::before {
-  opacity: 0.05;
+  opacity: 0.09;
+}
+:root[data-theme="dark"] body::after {
+  opacity: 0.06;
+}
+
+/* A list card wears its own ink: a spine down the left edge and a faint wash
+   pooling from the top-right corner, so two lists never read as the same card
+   in different type colours. --card-ink is set inline from the list's hue. */
+.ink-card {
+  background:
+    radial-gradient(
+      135% 120% at 100% 0%,
+      color-mix(in srgb, var(--card-ink) 16%, transparent) 0%,
+      transparent 58%
+    ),
+    var(--card);
+  box-shadow: inset 3px 0 0 0 var(--card-ink);
 }
 
 /* --- The stamp press --------------------------------------------------------

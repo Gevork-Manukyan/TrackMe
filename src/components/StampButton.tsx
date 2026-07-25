@@ -1,7 +1,7 @@
 "use client";
 
 import { toggleItemVisited } from "@/lib/db/mutations";
-import { stampDate, stampRotation } from "@/lib/stamp";
+import { stampRotation } from "@/lib/stamp";
 import type { Ink } from "@/lib/ink";
 
 type Props = {
@@ -19,6 +19,11 @@ type Props = {
  * The check-off control. No optimistic layer is needed any more: the write goes
  * to IndexedDB, and useLiveQuery re-renders from it immediately, so the stamp
  * appears as fast as it ever did without a server round trip in the path.
+ *
+ * The mark is a clean pressed seal — no date. When every row was stamped the
+ * same day, thirteen identical "JUL 22" rings read as wallpaper; the date is a
+ * real fact and now lives in the row's own detail panel. The ring stays the
+ * mark, the ink stays the list's, and the hand-pressed angle stays the charm.
  */
 export function StampButton({
   id,
@@ -29,7 +34,6 @@ export function StampButton({
   onStamped,
 }: Props) {
   const rotation = stampRotation(id);
-  const stamp = visitedAt ? stampDate(new Date(visitedAt)) : null;
 
   return (
     <button
@@ -57,13 +61,17 @@ export function StampButton({
             color: `var(--ink-${ink})`,
           }}
         >
-          <span className="grid h-11 w-11 place-items-center rounded-full border leading-none [border-color:currentColor] opacity-80">
-            <span className="font-mono text-[9px] tracking-[0.14em]">
-              {stamp?.month ?? "VISIT"}
-            </span>
-            <span className="font-mono text-sm font-semibold">
-              {stamp?.day ?? "✓"}
-            </span>
+          <span className="grid h-11 w-11 place-items-center rounded-full border [border-color:currentColor] opacity-90">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+              <path
+                d="M5 12.5 10 17.5 19 7"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </span>
         </span>
       ) : (

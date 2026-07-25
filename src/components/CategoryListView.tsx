@@ -10,7 +10,7 @@ import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import { AddForm } from "./AddForm";
 import { StampDots } from "./StampDots";
 import { SearchField } from "./SearchField";
-import { RecentStamps, type RecentStamp } from "./RecentStamps";
+import { PassportHero } from "./PassportHero";
 import { SyncStatus } from "./SyncStatus";
 import { ThemeToggle } from "./ThemeToggle";
 import { SignOutButton } from "./SignOutButton";
@@ -18,7 +18,6 @@ import { Menu } from "./Menu";
 
 /** Below this, a search field is noise rather than help. */
 const SEARCH_THRESHOLD = 8;
-const RECENT_LIMIT = 8;
 
 export function CategoryListView({ userId }: { userId: string }) {
   const [query, setQuery] = useState("");
@@ -37,21 +36,9 @@ export function CategoryListView({ userId }: { userId: string }) {
     );
     const nameById = new Map(categories.map((c) => [c.id, c.name] as const));
 
-    const recent: RecentStamp[] = items
-      .filter((i) => i.visited && i.visitedAt && nameById.has(i.categoryId))
-      .sort((a, b) => (b.visitedAt ?? "").localeCompare(a.visitedAt ?? ""))
-      .slice(0, RECENT_LIMIT)
-      .map((i) => ({
-        id: i.id,
-        name: i.name,
-        visitedAt: i.visitedAt as string,
-        categoryId: i.categoryId,
-        categoryName: nameById.get(i.categoryId) as string,
-        ink: inkById.get(i.categoryId)!,
-      }));
-
     return {
-      recent,
+      // The hero measures the whole collection, not any one list.
+      totalStamped: items.filter((i) => i.visited).length,
       lists: categories.map((category) => {
         const own = items.filter((i) => i.categoryId === category.id);
         return {
@@ -92,7 +79,7 @@ export function CategoryListView({ userId }: { userId: string }) {
     : null;
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6 sm:max-w-2xl">
       <header className="mb-1 flex items-center justify-between gap-3">
         <h1 className="font-display display-wonk text-[2.5rem] leading-none font-semibold tracking-tight">
           TrackMe
@@ -118,7 +105,7 @@ export function CategoryListView({ userId }: { userId: string }) {
 
       {data !== undefined && results === null && (
         <div className="mb-7">
-          <RecentStamps stamps={data.recent} />
+          <PassportHero totalStamped={data.totalStamped} />
         </div>
       )}
 
@@ -151,35 +138,41 @@ export function CategoryListView({ userId }: { userId: string }) {
           you&rsquo;re chasing.
         </p>
       ) : (
-        <ul className="flex flex-col gap-2.5">
-          {lists.map((list) => (
-            <li key={list.id}>
-              <Link
-                href={`/c/${list.id}`}
-                className="block rounded-2xl border border-rule bg-card p-4"
-              >
-                <div className="flex items-baseline justify-between gap-3">
-                  <h2
-                    className="font-display display-wonk truncate text-2xl font-semibold"
-                    style={{ color: `var(--ink-${list.ink})` }}
-                  >
-                    {list.name}
-                  </h2>
-                  <span className="shrink-0 font-mono text-xs tracking-widest text-slate uppercase">
-                    {list.stamped > 0
-                      ? `${list.stamped} stamped`
-                      : list.total === 0
-                        ? "empty"
-                        : "none yet"}
-                  </span>
-                </div>
-                <StampDots stamps={list.stamped} />
-              </Link>
-            </li>
-          ))}
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {lists.map((list) => {
+            const label =
+              list.stamped > 0
+                ? `${list.stamped} stamped`
+                : list.total === 0
+                  ? "empty"
+                  : "none yet";
+            return (
+              <li key={list.id}>
+                <Link
+                  href={`/c/${list.id}`}
+                  className="ink-card flex h-full flex-col justify-between gap-4 rounded-2xl border border-rule p-4 pl-5 transition-transform hover:-translate-y-0.5"
+                  style={{
+                    ["--card-ink" as string]: `var(--ink-${list.ink})`,
+                  }}
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h2
+                      className="font-display display-wonk truncate text-2xl font-semibold"
+                      style={{ color: `var(--ink-${list.ink})` }}
+                    >
+                      {list.name}
+                    </h2>
+                    <span className="shrink-0 font-mono text-xs tracking-widest text-slate uppercase">
+                      {label}
+                    </span>
+                  </div>
+                  <StampDots stamps={list.stamped} className="" />
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
-
     </main>
   );
 }

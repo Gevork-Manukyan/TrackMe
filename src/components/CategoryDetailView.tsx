@@ -103,7 +103,7 @@ export function CategoryDetailView({
   const showSearch = items.length >= SEARCH_THRESHOLD;
 
   return (
-    <main className="mx-auto w-full max-w-md flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-md flex-1 px-4 py-6 sm:max-w-2xl">
       <div className="flex items-center justify-between gap-3">
         <Link
           href="/"
@@ -182,7 +182,7 @@ export function CategoryDetailView({
               : "Every place here is stamped. Nice."}
         </p>
       ) : (
-        <ul className="flex flex-col gap-2.5">
+        <ul className="grid gap-2.5 lg:grid-cols-2 lg:items-start">
           {visible.map((item) => (
             <ItemRow
               key={item.id}
