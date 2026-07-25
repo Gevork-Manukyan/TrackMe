@@ -106,17 +106,34 @@
   --rank-violet: #9b7fd4;
 }
 
+/* The ground colour lives on <html> too, so the safe-area strips iOS leaves
+   around a home-screen PWA (behind the status bar, under the home indicator)
+   are filled with the page colour instead of showing through white. */
+html {
+  background: var(--ground);
+}
+
 /* A soft dome of light at the top centre lifts the page off a flat fill and
-   gives the paper somewhere to catch the light. */
+   gives the paper somewhere to catch the light. The trailing var(--ground) is a
+   solid fallback so the fill is never transparent. */
 body {
+  min-height: 100dvh;
   background:
     radial-gradient(
       130% 90% at 50% -10%,
       color-mix(in srgb, var(--card) 55%, var(--ground)) 0%,
       var(--ground) 55%
-    );
-  background-attachment: fixed;
+    )
+    var(--ground);
   color: var(--ink);
+  /* Installed to the home screen, the app draws edge-to-edge behind the status
+     bar and home indicator (viewport-fit=cover). Inset the content by the safe
+     areas so the wordmark clears the notch and nothing hides under the home
+     indicator; the background still bleeds under both. */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Two texture layers behind everything. A stamp book is a physical object; flat

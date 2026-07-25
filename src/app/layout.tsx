@@ -121,7 +121,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans min-h-full flex flex-col">
+      <body className="font-sans flex min-h-[100dvh] flex-col">
         {children}
         <ServiceWorkerRegistrar />
         <Analytics />

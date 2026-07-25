@@ -61,7 +61,7 @@ function LoginForm() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 p-6">
+    <main className="mx-auto flex max-w-sm flex-1 flex-col justify-center gap-6 p-6">
       <div>
         {/* The mark is the stamp itself — the thing the whole app is about. */}
         <Logo className="mb-4 h-11 w-11 text-stamp" title="" />
